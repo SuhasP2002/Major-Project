@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/logo.png') }}">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <title>YouTube Summarizer</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand head-text1" style="color: #db0001" href="#"><img class="logo" width='40px' height='40px' src="{{ url_for('static', filename='img/logo.png') }}" alt="logo"> YouSumma</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <span><a href="/about"><button style="background-color: #fff; color: black; font-weight: bold;">About</button></a></span>
+                <span><button onclick="downloadZip()">Download Extension</button></span>
+            </ul>
+        </div>
+    </nav>
+    <div class="header">
+
+        <div class="header-content">
+            <h1>Summarize YouTube Video in a Click...</h1>
+            <h3>Maximum information in limited time.</h3>
+            <p>Ready to try? Enter the URL here.</p>
+            <form id="transcriptForm" class="p-4 shadow-sm rounded">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="videoLink" placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="but-submit">Get Summary</button> 
+            </form>
+        </div>
+    </div>
+
+    <div style="margin-bottom: auto;">
+            <div id="spinner-container">
+                <div id="spinner" class="spinner-border" role="status">
+                    <span class="sr-only bg-white">Loading...</span>
+                </div>
+            </div>
+    
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-6">
+                    <div id="player" style="display: none;"></div>
+                </div>
+    
+                <div class="col-md-6">
+                    <div id="summaryResult" class="summary-container" style="display: none;">
+                        <div class="summary-container-header" >
+                        <ul class="nav nav-tabs" id="summaryTabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="summaryTab" data-toggle="tab" href="#summaryContent">Summary</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="transcriptTab" data-toggle="tab" href="#transcriptContent">Transcript</a>
+                            </li>
+                            <div class="ml-auto mr-3 mt-2">
+                                <button class="btn" id="copyButton" onclick="copyText()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                                  </svg></button>
+                                <button href="#" class="btn" onclick="downloadText()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down-fill" viewBox="0 0 16 16">
+                                    <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m-1 4v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 11.293V7.5a.5.5 0 0 1 1 0"/>
+                                  </svg></button>
+                            </div>
+                        </ul>
+                        </div>
+    
+                        <!-- Summary and Transcript Content -->
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="summaryContent" role="tabpanel">
+                                <div class="p-3">
+                                    <p>This is the summary content.</p>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="transcriptContent" role="tabpanel">
+                                <div class="p-3">
+                                    <p>This is the transcript content.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="features">
+        <div class="row">
+            <div class="text-col">
+                <h2>Simplified</h2>
+                <p>
+                  It analyzes transcript and summarizes it automatically, in a way that makes
+                  it easy for you to read, understand and act on.</p>
+            </div>
+            <div class="img-col">
+                <img src="{{ url_for('static', filename='img/feature-1.jpg') }}" alt="feature-1">
+            </div>
+        </div>
+        <div class="row">
+            <div class="img-col">
+                <img src="{{ url_for('static', filename='img/feature-2.png') }}" alt="feature-2">
+            </div>
+            <div class="text-col">
+                <h2>Download the summary.</h2>
+                <p>Save your summarized text easily and always have it to read.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="text-col">
+                <h2>Text to Speech.</h2>
+                <p>Summarized page is soon will be availabe in the text to speech format</p>
+            </div>
+            <div class="img-col">
+                <img src="{{ url_for('static', filename='img/feature-3.png') }}" alt="feature-3">
+            </div>
+        </div>
+        <div class="row">
+            <div class="img-col">
+                <img src="{{ url_for('static', filename='img/feature-4.png') }}" alt="feature-4">
+            </div>
+            <div class="text-col">
+                <h2>Ad-free reading</h2>
+                <p>This meticulously eliminates ads, popups, graphics, and other online distractions, providing you with a clean, uncluttered reading experience.</p>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <ul class="accordion">
+            <li>
+                <input type="radio" name="accordion" id="first">
+                <label for="first">What is Text summarization? What is YouTube Text Summarizer?</label>
+                <div class="content">
+                    <p>Text summarization is a process that creates a short, accurate, and fluent summary of a longer text document.<br><br>
+A YouTube text summarizer is a tool that can automatically generate a summary of a YouTube video's content. It analyzes the transcript of the video's audio to create a summary. This tool is useful for users who want to quickly understand the main points of a video without watching the entire video.</p>
+                </div>
+            </li>
+            <li>
+                <input type="radio" name="accordion" id="second">
+                <label for="second">Why use this tool?</label>
+                <div class="content">
+                    <p>This is a summarizing tool designed for students, writers, teachers, institutions, journalists, and any internet user who needs to quickly understand the essence of lengthy content.</p>
+                </div>
+            </li>
+            <li>
+                <input type="radio" name="accordion" id="third">
+                <label for="third">Does every YouTube video get summarized?</label>
+                <div class="content">
+                    <p>This is applicable for the YouTube videos which has subtitles such that transcripts are obtained for the summarization.</p>
+                </div>
+            </li>
+            <li>
+                <input type="radio" name="accordion" id="sixth">
+                <label for="sixth">What are advantages of YouTube text Summarization?</label>
+                <div class="content">
+                    <p> It saves our time by shortening the content to read while maintaining the important content of the actual document.</p>
+                </div>
+            </li>
+            <li>
+                <input type="radio" name="accordion" id="seventh">
+                <label for="seventh">How to get Chrome Extension?</label>
+                <div class="content">
+                    <p> You can download our Chrome Extension <a href="#" onclick="downloadZip()">here</a> and load onto your browser by turning on the Developer Mode.</p>
+                </div>
+            </li>
+        </ul>
+
+        <h1>Let's explore.</h1>
+
+    </div>
+
+    <div class="footer text-center">
+        <h2>For inquiries, email us at <a href="mailto:yousumma@gmail.com">yousumma@gmail.com</a></h2>
+    
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h4>Made with ❤️</h4>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="d-flex justify-content-center align-items-center"><i class="fab fa-linkedin mr-2"></i> Ranjan Kumar</a></li>
+                    <li><a href="https://www.linkedin.com/in/shreyas-kumar-kollur" target="_blank" class="d-flex justify-content-center align-items-center"><i class="fab fa-linkedin mr-2"></i> Shreyas Kumar</a></li>
+                    <li><a href="#" class="d-flex justify-content-center align-items-center"><i class="fab fa-linkedin mr-2"></i> Suhas Santosh Pai</a></li>
+                    <li><a href="#" class="d-flex justify-content-center align-items-center"><i class="fab fa-linkedin mr-2"></i> Suraj Upadhyay</a></li>
+                </ul>
+            </div>
+        </div>
+    
+        <p>&copy; 2024 YouSumma. All rights reserved.</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </div>
+</body>
+</html>
